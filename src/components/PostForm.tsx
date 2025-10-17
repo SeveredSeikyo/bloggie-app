@@ -1,8 +1,7 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
-import { useFormStatus } from 'react-dom';
-import { savePost } from '@/lib/actions';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { BlogPost } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,34 +13,13 @@ import { Loader2, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
-const initialState = { message: '' };
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} size="lg">
-      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-      {pending ? 'Saving...' : 'Save Post'}
-    </Button>
-  );
-}
-
 export function PostForm({ post }: { post?: BlogPost }) {
-  const [formState, formAction] = useActionState(savePost.bind(null, post?.id ?? null), initialState);
   const { toast } = useToast();
+  const router = useRouter();
   const [imagePreview, setImagePreview] = useState<string | null>(post?.imageUrl || null);
-  const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (formState.message && formState.errors) {
-      toast({
-        title: 'Error',
-        description: formState.message,
-        variant: 'destructive',
-      });
-    }
-  }, [formState, toast]);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{title?: string[], content?: string[], image?: string[]}>({});
+  
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -50,10 +28,53 @@ export function PostForm({ post }: { post?: BlogPost }) {
       setImagePreview(post?.imageUrl || null);
     }
   };
+  
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setErrors({});
+
+    const formData = new FormData(event.currentTarget);
+    const url = post ? `/api/blogs/${post.id}` : '/api/blogs';
+    const method = post ? 'PATCH' : 'POST';
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setErrors(errorData.errors || {});
+        throw new Error(errorData.message || 'Failed to save the post.');
+      }
+      
+      toast({
+        title: 'Success!',
+        description: `Post has been ${post ? 'updated' : 'created'}.`,
+      });
+
+      // To see the changes we need to navigate back and have the page re-fetch
+      router.push('/');
+      router.refresh();
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unknown error occurred";
+       toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
 
   return (
     <div className="space-y-8">
-      <form ref={formRef} action={formAction} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="font-headline">Post Details</CardTitle>
@@ -69,7 +90,7 @@ export function PostForm({ post }: { post?: BlogPost }) {
                 required
                 className="text-lg"
               />
-              {formState.errors?.title && <p className="text-sm text-destructive">{formState.errors.title.join(', ')}</p>}
+              {errors?.title && <p className="text-sm text-destructive">{errors.title.join(', ')}</p>}
             </div>
 
             <div className="space-y-2">
@@ -82,19 +103,19 @@ export function PostForm({ post }: { post?: BlogPost }) {
                 className="min-h-[300px]"
                 required
               />
-              {formState.errors?.content && <p className="text-sm text-destructive">{formState.errors.content.join(', ')}</p>}
+              {errors?.content && <p className="text-sm text-destructive">{errors.content.join(', ')}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="image">Featured Image</Label>
-              <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
+              <Input id="image" name="image" type="file" accept="image/png, image/jpeg, image/gif" onChange={handleImageChange} />
               {post?.imageUrl && <input type="hidden" name="existingImageUrl" value={post.imageUrl} />}
               {imagePreview && (
                 <div className="mt-4 relative w-full aspect-video rounded-md overflow-hidden border">
                     <Image src={imagePreview} alt="Image preview" fill className="object-cover" data-ai-hint="image preview" />
                 </div>
               )}
-              {formState.errors?.image && <p className="text-sm text-destructive">{formState.errors.image.join(', ')}</p>}
+              {errors?.image && <p className="text-sm text-destructive">{errors.image.join(', ')}</p>}
             </div>
 
             <div className="space-y-2">
@@ -112,7 +133,10 @@ export function PostForm({ post }: { post?: BlogPost }) {
             </div>
             
             <div className="flex justify-end pt-4">
-              <SubmitButton />
+               <Button type="submit" disabled={isSubmitting} size="lg">
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {isSubmitting ? 'Saving...' : 'Save Post'}
+              </Button>
             </div>
           </CardContent>
         </Card>

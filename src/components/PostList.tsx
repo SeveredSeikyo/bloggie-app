@@ -8,7 +8,13 @@ import DeletePostButton from './DeletePostButton';
 import Image from 'next/image';
 import { UpdateStatusButton } from './UpdateStatusButton';
 
-export function PostList({ posts }: { posts: BlogPost[] }) {
+interface PostListProps {
+  posts: BlogPost[];
+  onPostDeleted: (id: string) => void;
+  onPostStatusChanged: (id: string, newStatus: 'draft' | 'posted') => void;
+}
+
+export function PostList({ posts, onPostDeleted, onPostStatusChanged }: PostListProps) {
   if (posts.length === 0) {
     return (
       <div className="text-center py-20">
@@ -49,7 +55,7 @@ export function PostList({ posts }: { posts: BlogPost[] }) {
             <p className="text-muted-foreground line-clamp-3">{post.content}</p>
           </CardContent>
           <CardFooter className="flex justify-between items-center gap-2 bg-muted/50 p-4">
-            <UpdateStatusButton id={post.id} status={post.status} />
+            <UpdateStatusButton id={post.id} status={post.status} onPostStatusChanged={onPostStatusChanged} />
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" asChild>
                 <Link href={`/posts/${post.id}`}>
@@ -63,7 +69,7 @@ export function PostList({ posts }: { posts: BlogPost[] }) {
                   <span className="sr-only">Edit</span>
                 </Link>
               </Button>
-              <DeletePostButton id={post.id} />
+              <DeletePostButton id={post.id} onPostDeleted={onPostDeleted} />
             </div>
           </CardFooter>
         </Card>

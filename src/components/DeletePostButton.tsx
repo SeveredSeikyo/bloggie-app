@@ -14,10 +14,36 @@ import {
 import { Button } from '@/components/ui/button';
 import { Trash2, Loader2 } from 'lucide-react';
 import { useTransition } from 'react';
-import { deletePostAction } from '@/lib/actions';
+import { useToast } from '@/hooks/use-toast';
 
-export default function DeletePostButton({ id }: { id: string }) {
+
+export default function DeletePostButton({ id, onPostDeleted }: { id: string, onPostDeleted: (id: string) => void }) {
   const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
+  const handleDelete = async () => {
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/blogs/${id}`, {
+          method: 'DELETE',
+        });
+        if (!res.ok) {
+          throw new Error('Failed to delete post');
+        }
+        onPostDeleted(id);
+        toast({
+          title: 'Success',
+          description: 'Post deleted successfully.',
+        });
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to delete post.',
+          variant: 'destructive',
+        });
+      }
+    });
+  };
 
   return (
     <AlertDialog>
@@ -37,11 +63,7 @@ export default function DeletePostButton({ id }: { id: string }) {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => {
-              startTransition(async () => {
-                await deletePostAction(id);
-              });
-            }}
+            onClick={handleDelete}
             disabled={isPending}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >

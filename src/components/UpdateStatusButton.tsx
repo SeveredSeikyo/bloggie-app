@@ -1,17 +1,48 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { updatePostStatusAction } from "@/lib/actions";
 import { useTransition } from "react";
 import { Loader2, CheckCircle, Edit } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-export function UpdateStatusButton({ id, status }: { id: string, status: 'draft' | 'posted' }) {
+interface UpdateStatusButtonProps {
+    id: string;
+    status: 'draft' | 'posted';
+    onPostStatusChanged: (id: string, newStatus: 'draft' | 'posted') => void;
+}
+
+export function UpdateStatusButton({ id, status, onPostStatusChanged }: UpdateStatusButtonProps) {
     const [isPending, startTransition] = useTransition();
+    const { toast } = useToast();
     const newStatus = status === 'draft' ? 'posted' : 'draft';
 
     const handleClick = () => {
         startTransition(async () => {
-            await updatePostStatusAction(id, newStatus);
+            try {
+                const formData = new FormData();
+                formData.append('status', newStatus);
+
+                const res = await fetch(`/api/blogs/${id}`, {
+                    method: 'PATCH',
+                    body: formData,
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to update status');
+                }
+                
+                onPostStatusChanged(id, newStatus);
+                toast({
+                    title: 'Success',
+                    description: 'Post status updated.'
+                });
+            } catch (error) {
+                toast({
+                    title: 'Error',
+                    description: 'Failed to update post status.',
+                    variant: 'destructive'
+                });
+            }
         });
     };
 
