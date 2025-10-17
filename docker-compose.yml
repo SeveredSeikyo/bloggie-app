@@ -9,3 +9,5 @@ services:
       - ./src/lib/db.json:/app/src/lib/db.json
       - ./public/uploads:/app/public/uploads
     restart: unless-stopped
+    env_file:
+      - .env
