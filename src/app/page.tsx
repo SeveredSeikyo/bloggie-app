@@ -4,10 +4,12 @@ import type { BlogPost } from '@/lib/types';
 import { PostList } from '@/components/PostList';
 import Header from '@/components/Header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Home() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -32,7 +34,7 @@ export default function Home() {
     setPosts(prevPosts => prevPosts.map(p => p.id === id ? {...p, status} : p));
   }
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
         <div className="min-h-screen bg-background">
             <Header />
@@ -57,7 +59,7 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <PostList posts={posts} onPostDeleted={onPostDeleted} onPostStatusChanged={onPostStatusChanged} />
+        <PostList posts={posts} onPostDeleted={onPostDeleted} onPostStatusChanged={onPostStatusChanged} isAuthenticated={!!user} />
       </main>
     </div>
   );

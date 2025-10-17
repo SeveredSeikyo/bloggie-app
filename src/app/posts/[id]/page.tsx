@@ -9,11 +9,13 @@ import Link from 'next/link';
 import { Edit } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/context/AuthContext';
 
 export default function PostPage({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -75,11 +77,13 @@ export default function PostPage({ params }: { params: { id: string } }) {
             <Badge variant={post.status === 'posted' ? 'default' : 'secondary'} className="capitalize">
               {post.status}
             </Badge>
-            <Button asChild variant="outline" size="sm">
-                <Link href={`/posts/${post.id}/edit`}>
-                    <Edit className="mr-2 h-4 w-4" /> Edit
-                </Link>
-            </Button>
+            {user && (
+              <Button asChild variant="outline" size="sm">
+                  <Link href={`/posts/${post.id}/edit`}>
+                      <Edit className="mr-2 h-4 w-4" /> Edit
+                  </Link>
+              </Button>
+            )}
           </div>
 
           <h1 className="font-headline text-4xl md:text-5xl font-bold mb-4 leading-tight text-card-foreground">{post.title}</h1>

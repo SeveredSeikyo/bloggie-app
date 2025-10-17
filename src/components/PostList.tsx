@@ -12,17 +12,22 @@ interface PostListProps {
   posts: BlogPost[];
   onPostDeleted: (id: string) => void;
   onPostStatusChanged: (id: string, newStatus: 'draft' | 'posted') => void;
+  isAuthenticated: boolean;
 }
 
-export function PostList({ posts, onPostDeleted, onPostStatusChanged }: PostListProps) {
+export function PostList({ posts, onPostDeleted, onPostStatusChanged, isAuthenticated }: PostListProps) {
   if (posts.length === 0) {
     return (
       <div className="text-center py-20">
         <h2 className="text-2xl font-headline">No blog posts yet.</h2>
-        <p className="text-muted-foreground mt-2">Why not create one?</p>
-        <Button asChild className="mt-4">
-          <Link href="/posts/new">Create New Post</Link>
-        </Button>
+        {isAuthenticated && (
+          <>
+            <p className="text-muted-foreground mt-2">Why not create one?</p>
+            <Button asChild className="mt-4">
+              <Link href="/posts/new">Create New Post</Link>
+            </Button>
+          </>
+        )}
       </div>
     );
   }
@@ -55,7 +60,9 @@ export function PostList({ posts, onPostDeleted, onPostStatusChanged }: PostList
             <p className="text-muted-foreground line-clamp-3">{post.content}</p>
           </CardContent>
           <CardFooter className="flex justify-between items-center gap-2 bg-muted/50 p-4">
-            <UpdateStatusButton id={post.id} status={post.status} onPostStatusChanged={onPostStatusChanged} />
+            {isAuthenticated ? (
+                <UpdateStatusButton id={post.id} status={post.status} onPostStatusChanged={onPostStatusChanged} />
+            ) : <div/>}
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" asChild>
                 <Link href={`/posts/${post.id}`}>
@@ -63,13 +70,17 @@ export function PostList({ posts, onPostDeleted, onPostStatusChanged }: PostList
                   <span className="sr-only">View</span>
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link href={`/posts/${post.id}/edit`}>
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Edit</span>
-                </Link>
-              </Button>
-              <DeletePostButton id={post.id} onPostDeleted={onPostDeleted} />
+              {isAuthenticated && (
+                <>
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link href={`/posts/${post.id}/edit`}>
+                      <Edit className="h-4 w-4" />
+                      <span className="sr-only">Edit</span>
+                    </Link>
+                  </Button>
+                  <DeletePostButton id={post.id} onPostDeleted={onPostDeleted} />
+                </>
+              )}
             </div>
           </CardFooter>
         </Card>
