@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  if (['POST', 'PATCH', 'DELETE'].includes(req.method)) {
+  // We only want to protect routes that modify data
+  if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'DELETE') {
     const basicAuth = req.headers.get('authorization');
     if (basicAuth) {
       const authValue = basicAuth.split(' ')[1];
+      // The value is base64 encoded
       const [user, pwd] = atob(authValue).split(':');
 
       const adminUser = process.env.ADMIN_USERNAME;
@@ -15,6 +17,7 @@ export function middleware(req: NextRequest) {
       }
     }
     
+    // If we are here, authentication failed or was not provided
     return new NextResponse('Authentication required.', {
       status: 401,
       headers: {
@@ -23,6 +26,7 @@ export function middleware(req: NextRequest) {
     });
   }
 
+  // Allow GET requests to pass through
   return NextResponse.next();
 }
 
