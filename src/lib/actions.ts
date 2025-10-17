@@ -4,8 +4,6 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { addPost, deletePost, getPost, updatePost } from '@/lib/data';
-import { generateBlogPostIdeas } from '@/ai/flows/generate-blog-post-ideas';
-import { generateBlogPostContent } from '@/ai/flows/generate-blog-post-content';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
@@ -104,32 +102,5 @@ export async function updatePostStatusAction(id: string, status: 'draft' | 'post
         revalidatePath(`/posts/${id}`);
     } catch (error) {
         return { message: 'Database Error: Failed to update status.' };
-    }
-}
-
-
-export async function generateIdeasAction(topic: string) {
-    if (!topic) {
-        return { error: 'Topic is required.' };
-    }
-    try {
-        const result = await generateBlogPostIdeas({ topic });
-        return { ideas: result.ideas };
-    } catch (error) {
-        console.error(error);
-        return { error: 'Failed to generate ideas.' };
-    }
-}
-
-export async function generateContentAction(title: string) {
-    if (!title) {
-        return { error: 'Title is required.' };
-    }
-    try {
-        const result = await generateBlogPostContent({ title });
-        return { content: result.content };
-    } catch (error) {
-        console.error(error);
-        return { error: 'Failed to generate content.' };
     }
 }

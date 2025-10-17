@@ -12,7 +12,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEffect, useRef, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import AiTools from './AiTools';
 import Image from 'next/image';
 
 const initialState = { message: '' };
@@ -30,8 +29,6 @@ function SubmitButton() {
 export function PostForm({ post }: { post?: BlogPost }) {
   const [formState, formAction] = useFormState(savePost.bind(null, post?.id ?? null), initialState);
   const { toast } = useToast();
-  const [content, setContent] = useState(post?.content || '');
-  const [title, setTitle] = useState(post?.title || '');
   const [imagePreview, setImagePreview] = useState<string | null>(post?.imageUrl || null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -56,8 +53,6 @@ export function PostForm({ post }: { post?: BlogPost }) {
 
   return (
     <div className="space-y-8">
-      <AiTools setContent={setContent} setTitle={setTitle} currentTitle={title} />
-      
       <form ref={formRef} action={formAction} className="space-y-6">
         <Card>
           <CardHeader>
@@ -69,8 +64,7 @@ export function PostForm({ post }: { post?: BlogPost }) {
               <Input
                 id="title"
                 name="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                defaultValue={post?.title}
                 placeholder="Your amazing blog post title"
                 required
                 className="text-lg"
@@ -83,8 +77,7 @@ export function PostForm({ post }: { post?: BlogPost }) {
               <Textarea
                 id="content"
                 name="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+                defaultValue={post?.content}
                 placeholder="Write your heart out..."
                 className="min-h-[300px]"
                 required
