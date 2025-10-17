@@ -44,5 +44,6 @@ export const config = {
     '/api/mark-posted',
     '/api/user',
     '/api/logout',
+    '/api/post-blogs',
   ],
 };
