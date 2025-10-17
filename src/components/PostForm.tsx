@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -11,11 +12,13 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Loader2, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 
 export function PostForm({ post }: { post?: BlogPost }) {
   const { toast } = useToast();
   const router = useRouter();
+  const { getAuthHeader } = useAuth();
   const [imagePreview, setImagePreview] = useState<string | null>(post?.imageUrl || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{title?: string[], content?: string[], image?: string[]}>({});
@@ -41,6 +44,7 @@ export function PostForm({ post }: { post?: BlogPost }) {
     try {
       const response = await fetch(url, {
         method: method,
+        headers: getAuthHeader(),
         body: formData,
       });
 

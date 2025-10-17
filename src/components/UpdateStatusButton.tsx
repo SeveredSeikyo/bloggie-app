@@ -1,9 +1,11 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { useTransition } from "react";
 import { Loader2, CheckCircle, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 interface UpdateStatusButtonProps {
     id: string;
@@ -14,6 +16,7 @@ interface UpdateStatusButtonProps {
 export function UpdateStatusButton({ id, status, onPostStatusChanged }: UpdateStatusButtonProps) {
     const [isPending, startTransition] = useTransition();
     const { toast } = useToast();
+    const { getAuthHeader } = useAuth();
     const newStatus = status === 'draft' ? 'posted' : 'draft';
 
     const handleClick = () => {
@@ -24,6 +27,7 @@ export function UpdateStatusButton({ id, status, onPostStatusChanged }: UpdateSt
 
                 const res = await fetch(`/api/blogs/${id}`, {
                     method: 'PATCH',
+                    headers: getAuthHeader(),
                     body: formData,
                 });
 

@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -15,17 +16,20 @@ import { Button } from '@/components/ui/button';
 import { Trash2, Loader2 } from 'lucide-react';
 import { useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 
 export default function DeletePostButton({ id, onPostDeleted }: { id: string, onPostDeleted: (id: string) => void }) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { getAuthHeader } = useAuth();
 
   const handleDelete = async () => {
     startTransition(async () => {
       try {
         const res = await fetch(`/api/blogs/${id}`, {
           method: 'DELETE',
+          headers: getAuthHeader(),
         });
         if (!res.ok) {
           throw new Error('Failed to delete post');

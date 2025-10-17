@@ -1,8 +1,8 @@
 
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 export async function POST() {
-  cookies().delete('auth_token');
+  // With JWT, logout is primarily a client-side action (deleting the token).
+  // This endpoint can be kept for consistency or future use (e.g., token blocklisting).
   return NextResponse.json({ success: true });
 }
