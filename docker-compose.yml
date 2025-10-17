@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "3080:3000"
+    volumes:
+      - ./src/lib/db.json:/app/src/lib/db.json
+      - ./public/uploads:/app/public/uploads
+    restart: unless-stopped
