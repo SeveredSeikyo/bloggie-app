@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "1",
+      "description": "Abstract digital landscape",
+      "imageUrl": "https://picsum.photos/seed/blog1/1200/800",
+      "imageHint": "digital landscape"
+    },
+    {
+      "id": "2",
+      "description": "A market with spices",
+      "imageUrl": "https://picsum.photos/seed/blog2/1200/800",
+      "imageHint": "spice market"
+    },
+    {
+      "id": "3",
+      "description": "Futuristic city with transport",
+      "imageUrl": "https://picsum.photos/seed/blog3/1200/800",
+      "imageHint": "futuristic city"
+    },
+    {
+      "id": "4",
+      "description": "Man writing at a desk",
+      "imageUrl": "https://picsum.photos/seed/blog4/1200/800",
+      "imageHint": "writing desk"
+    }
+  ]
 }
