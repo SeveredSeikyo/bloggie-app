@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useRef, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { savePost } from '@/lib/actions';
 import type { BlogPost } from '@/lib/types';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useEffect, useRef, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
@@ -27,7 +27,7 @@ function SubmitButton() {
 }
 
 export function PostForm({ post }: { post?: BlogPost }) {
-  const [formState, formAction] = useFormState(savePost.bind(null, post?.id ?? null), initialState);
+  const [formState, formAction] = useActionState(savePost.bind(null, post?.id ?? null), initialState);
   const { toast } = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(post?.imageUrl || null);
   const formRef = useRef<HTMLFormElement>(null);
